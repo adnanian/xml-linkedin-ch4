@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Load External XML</title>
+    <script type="text/javascript">
+        async function loadXMLDoc(docURL) {
+            // Wait for the document to load.
+            const doc = await fetch(docURL);
+            // Get the text version of it.
+            var response = await doc.text();
+            // Parse the text into an XML DOM object.
+            // The second parameter indicates that it is XML and not HTML.
+            // If you leave it off, it will default to HTML and you won't get
+            // the correct result.
+            var xml = new DOMParser().parseFromString(response, "text/xml");
+            return xml;
+        }
+
+        /**
+         * This function loads the XML document and then extracts the
+         * business card data from it and displays it in an alert box.
+         */
+        function displayBusinessCardData() {
+            // Load the XML document.
+            // The loadXMLDoc function returns a Promise object, so we have to
+            // use the "then" function to get the result after it loads.
+            loadXMLDoc("businesscard.xml").then((xml) => {
+                var bizCard = xml.getElementsByTagName("BusinessCard")[0];
+
+                var name =
+                    "Name: " +
+                    bizCard.getElementsByTagName("Name")[0].firstChild.data;
+                var email =
+                    "email: " +
+                    bizCard.getElementsByTagName("email")[0].firstChild
+                        .data;
+
+                alert("BusinessCard Data: \n\n" + name + "\n" + email);
+            });
+        }
+
+        window.addEventListener("load", function () {
+            document
+                .getElementById("showBCardData")
+                .addEventListener("click", displayBusinessCardData);
+        });
+    </script>
+    <link rel="stylesheet" href="businesscard.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <button id="showBCardData">Show Business Card Data</button>
+</body>
+
+</html>

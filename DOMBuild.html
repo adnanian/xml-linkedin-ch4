@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Build XML with the DOM</title>
+    <script type="text/javascript">
+        async function loadXMLDoc(docURL) {
+            let doc = await fetch(docURL);
+            let response = await doc.text();
+            let xml = new DOMParser().parseFromString(response, "text/xml");
+            return xml;
+        }
+
+        function createNameSection(currentCard) {
+            const nameSection = document.createElement("div");
+            nameSection.setAttribute("class", "Name");
+            // createTextNode() creates a text node
+            // and appends it to the <div> element
+            const nameStr = document.createTextNode(
+                currentCard.getElementsByTagName("Name")[0].firstChild.data
+            );
+            nameSection.appendChild(nameStr);
+            return nameSection;
+        }
+
+        function createEmailSection(currentCard) {
+            const emailSection = document.createElement("div");
+            emailSection.setAttribute("class", "Email");
+            const emailStr = document.createTextNode(
+                currentCard.getElementsByTagName("email")[0].firstChild.data
+            );
+            emailSection.appendChild(emailStr);
+            return emailSection;
+        }
+
+        function createCardElement() {
+            // get references to the data island and the array of business cards
+            loadXMLDoc("businesscard.xml").then(xmlData => {
+                var bizCard = xmlData.getElementsByTagName("BusinessCard")[0];
+
+                // make a new <div> for the whole card
+                var newCard = document.createElement("div");
+                newCard.setAttribute("class", "BusinessCard");
+
+                // now create a <div> for the name
+                const newName = createNameSection(xmlData);
+                newCard.appendChild(newName);
+
+                // create a <div> for the email
+                const newEmail = createEmailSection(xmlData);
+                newCard.appendChild(newEmail);
+
+                // now add the new <div> containing the card info to the web page
+                document
+                    .getElementById("cardContainer")
+                    .appendChild(newCard);
+            });
+        }
+
+        window.addEventListener("load", function () {
+            document
+                .getElementById("createCard")
+                .addEventListener("click", createCardElement);
+        });
+    </script>
+    <link rel="stylesheet" href="businesscard.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <button id="createCard">Create Business Card Element</button>
+    <div id="cardContainer"></div>
+</body>
+
+</html>
