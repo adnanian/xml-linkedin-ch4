@@ -11,21 +11,70 @@
             return xml;
         }
 
+        // DRY function for all contact info types.
+        function createCardSection(currentCard, className, index, subType = '') {
+            try {
+                const cardSection = document.createElement('div');
+                cardSection.setAttribute('class', className);
+                // createTextNode() creates a text node
+                // and appends it to the <div> element
+                let textNode = '';
+                switch (className) {
+                    case 'email':
+                        textNode = 'email: ' + currentCard.getElementsByTagName(className)[index].firstChild.data;
+                        break;
+                    case 'phone':
+                        const phoneNumber = Array.from(
+                            currentCard.getElementsByTagName('BusinessCard')
+                            [index].getElementsByTagName(className)
+                        ).filter((phone) => phone.getAttribute('type') === subType)[0].firstChild.data;
+                        textNode = `${subType}: ${phoneNumber}`;
+                        break;
+                    default:
+                        textNode = currentCard.getElementsByTagName(className)[index].firstChild.data;
+                        break;
+                }
+                const cardSectionStr = document.createTextNode(textNode);
+                cardSection.appendChild(cardSectionStr);
+                return cardSection;
+            } catch (error) {
+                if (subType === 'home') {
+                    console.error(error);
+                }
+                return undefined;
+            }
+        }
+
         function createCardElements() {
             loadXMLDoc('challenge.xml').then((xmlData) => {
+                // console.log(xmlData);
                 // Get the business Card Container.
                 // Then, get the business cards.
                 const container = document.getElementById('cardContainer');
-                const bizCardData = xmlData.getElementsByTagName('BusinessCards')[0].childNodes;
-
-                // Make Cards
-                const bizCards = bizCardData.map((bizCard) => {
+                const bizCards = Array.from(xmlData.getElementsByTagName('BusinessCards')[0].getElementsByTagName('BusinessCard'));
+                bizCards.forEach((bizCard, index) => {
                     const newCard = document.createElement('div');
                     newCard.setAttribute('class', 'BusinessCard');
-
                     // Name
-                    // Phones
+                    const name = createCardSection(xmlData, 'Name', index);
+                    if (!!name) newCard.appendChild(name);
+                    // Mobile
+                    const mobile = createCardSection(xmlData, 'phone', index, 'mobile');
+                    if (!!mobile) newCard.appendChild(mobile);
+                    // Home
+                    const home = createCardSection(xmlData, 'phone', index, 'home');
+                    if (!!home) newCard.appendChild(home);
+                    // Work
+                    const work = createCardSection(xmlData, 'phone', index, 'work');
+                    if (!!work) newCard.appendChild(work);
+                    // Fax
+                    const fax = createCardSection(xmlData, 'phone', index, 'fax');
+                    if (!!fax) newCard.appendChild(fax);
                     // Email
+                    const email = createCardSection(xmlData, 'email', index);
+                    if (!!email) newCard.appendChild(email);
+                    // Add card
+                    container.appendChild(newCard);
                 });
             });
         }
